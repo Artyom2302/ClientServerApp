@@ -24,18 +24,18 @@ int EnterInt(int downBorder = 0, int upBorder = 1000) {
 }
 
 void MenuHandler() {
-	cout << endl << "Enter client Id address(-1 to stop chat):";
+	cout << "Enter client Id address(-1 to stop chat):"<<endl;
 	int adr = EnterInt(-1);
 	if (adr == -1) {
 		Message::send(MR_BROKER, MT_EXIT);
+		cout << "Exit";
+		Sleep(2000);
+		exit(0);
 	}
-	cout << endl << "Enter msg: ";
+	cout << endl << "Enter msg: " << endl;
 	string str;
 	cin >> str;
 	Message::send(adr == 0 ? MR_ALL : adr + 100, MT_DATA, str);
-	cout << endl << "Continue(1) or No(2)";
-	adr = EnterInt(1, 2);
-
 }
 
 void ProcessMessages()
@@ -53,11 +53,17 @@ void ProcessMessages()
 			cout << "Client not found\n";
 			break;
 		case MT_CONFIRM:{
-			cout << "Exit"<<exit;
 			break;
 		}
 		case MT_NODATA: {
 			Sleep(500);
+			break;
+		}
+		case MT_EXIT:{
+			cout << "exit"<<endl;
+			Message::send(MR_BROKER, MT_EXIT);
+			exit(0);
+			break;
 		}
 		default:
 			Sleep(500);

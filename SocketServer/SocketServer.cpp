@@ -60,6 +60,7 @@ void ProcessClient(SOCKET hSock)
 		auto iSessionFrom = sessions.find(m.header.from);
 		if (iSessionFrom != sessions.end())
 		{
+			iSessionFrom->second->lastConnectionTime = time(NULL);
 			auto iSessionTo = sessions.find(m.header.to);
 			if (iSessionTo != sessions.end())
 			{
