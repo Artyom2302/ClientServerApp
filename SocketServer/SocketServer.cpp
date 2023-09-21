@@ -6,6 +6,7 @@
 #include "SocketServer.h"
 #include "Message.h"
 #include "Session.h"
+#include "Server.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,11 +21,10 @@ void LaunchClient()
 	CloseHandle(pi.hProcess);
 }
 
-int maxID = MR_USER;
-map<int, shared_ptr<Session>> sessions;
 
-void ProcessClient(SOCKET hSock)
+void ProcessClient(SOCKET hSock,Server* server)
 {
+	CSingleLock lock(&server->cs, TRUE);
 	CSocket s;
 	s.Attach(hSock);
 	Message m;
@@ -34,22 +34,22 @@ void ProcessClient(SOCKET hSock)
 	{
 	case MT_INIT:
 	{
-		auto session = make_shared<Session>(++maxID, m.data);
-		sessions[session->id] = session;
+		auto session = make_shared<Session>(++server->maxID, m.data);
+		server->sessions[session->id] = session;
 		Message::send(s, session->id, MR_BROKER, MT_INIT);
 		break;
 	}
 	case MT_EXIT:
 	{
-		sessions.erase(m.header.from);
+		server->sessions.erase(m.header.from);
 		cout << "Exit";
 		Message::send(s, m.header.from, MR_BROKER, MT_CONFIRM);
 		break;
 	}
 	case MT_GETDATA:
 	{
-		auto iSession = sessions.find(m.header.from);
-		if (iSession != sessions.end())
+		auto iSession = server->sessions.find(m.header.from);
+		if (iSession != server->sessions.end())
 		{
 			iSession->second->send(s);
 		}
@@ -57,18 +57,20 @@ void ProcessClient(SOCKET hSock)
 	}
 	default:
 	{
-		auto iSessionFrom = sessions.find(m.header.from);
-		if (iSessionFrom != sessions.end())
+		if (m.header.from == m.header.to) 
+			break;
+		auto iSessionFrom = server->sessions.find(m.header.from);
+		if (iSessionFrom != server->sessions.end())
 		{
 			iSessionFrom->second->lastConnectionTime = time(NULL);
-			auto iSessionTo = sessions.find(m.header.to);
-			if (iSessionTo != sessions.end())
+			auto iSessionTo = server->sessions.find(m.header.to);
+			if (iSessionTo != server->sessions.end())
 			{
 				iSessionTo->second->add(m);
 			}
 			else if (m.header.to == MR_ALL)
 			{
-				for (auto& [id, session] : sessions)
+				for (auto& [id, session] : server->sessions)
 				{
 					if (id != m.header.from)
 						session->add(m);
@@ -76,7 +78,7 @@ void ProcessClient(SOCKET hSock)
 			}
 			else
 			{
-				iSessionFrom->second->add(Message(m.header.to, MR_BROKER, MT_NOT_FOUND));
+				iSessionFrom->second->add(Message(m.header.from, m.header.to, MT_NOT_FOUND));
 			}
 		}
 		
@@ -85,13 +87,13 @@ void ProcessClient(SOCKET hSock)
 	}
 }
 
-void Server()
+void ServerStart()
 {
 	AfxSocketInit();
 
-	CSocket Server;
-	Server.Create(12345);
-
+	CSocket ServerSocket;
+	ServerSocket.Create(12345);
+	Server server;
 	for (int i = 0; i < 3; ++i)
 	{
 		LaunchClient();
@@ -99,11 +101,11 @@ void Server()
 
 	while (true)
 	{
-		if (!Server.Listen())
+		if (!ServerSocket.Listen())
 			break;
 		CSocket s;
-		Server.Accept(s);
-		thread t(ProcessClient, s.Detach());
+		ServerSocket.Accept(s);
+		thread t(ProcessClient, s.Detach(),&server);
 		t.detach();
 	}
 }
@@ -127,7 +129,7 @@ int main()
 		}
 		else
 		{
-			Server();
+			ServerStart();
 		}
 	}
 	else

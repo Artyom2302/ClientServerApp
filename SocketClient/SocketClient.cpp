@@ -50,7 +50,8 @@ void ProcessMessages()
 			MenuHandler();
 			break;
 		case MT_NOT_FOUND:
-			cout << "Client not found\n";
+			cout << "Client #"<<m.header.from-100<<" not found\n";
+			MenuHandler();
 			break;
 		case MT_CONFIRM:{
 			break;
