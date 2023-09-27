@@ -57,8 +57,6 @@ void ProcessClient(SOCKET hSock,Server* server)
 	}
 	default:
 	{
-		if (m.header.from == m.header.to) 
-			break;
 		auto iSessionFrom = server->sessions.find(m.header.from);
 		if (iSessionFrom != server->sessions.end())
 		{

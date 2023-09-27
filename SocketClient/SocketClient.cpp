@@ -23,35 +23,35 @@ int EnterInt(int downBorder = 0, int upBorder = 1000) {
 	return value;
 }
 
-void MenuHandler() {
+boolean MenuHandler() {
 	cout << "Enter client Id address(-1 to stop chat):"<<endl;
 	int adr = EnterInt(-1);
 	if (adr == -1) {
 		Message::send(MR_BROKER, MT_EXIT);
 		cout << "Exit";
 		Sleep(2000);
-		exit(0);
+		return true;
 	}
 	cout << endl << "Enter msg: " << endl;
 	string str;
 	cin >> str;
 	Message::send(adr == 0 ? MR_ALL : adr + 100, MT_DATA, str);
+	return false;
 }
 
 void ProcessMessages()
 {
-	while (true)
+	boolean exit  = false;
+	while (!exit)
 	{
 		Message m = Message::send(MR_BROKER, MT_GETDATA);
 		switch (m.header.type)
 		{
 		case MT_DATA:
 			cout <<endl<<"New message: "<< m.data << endl;
-			MenuHandler();
 			break;
 		case MT_NOT_FOUND:
 			cout << "Client #"<<m.header.from-100<<" not found\n";
-			MenuHandler();
 			break;
 		case MT_CONFIRM:{
 			break;
@@ -63,12 +63,15 @@ void ProcessMessages()
 		case MT_EXIT:{
 			cout << "exit"<<endl;
 			Message::send(MR_BROKER, MT_EXIT);
-			exit(0);
+			exit = true;
 			break;
 		}
 		default:
-			Sleep(500);
+			Sleep(500); 
 			break;
+		}
+		if (m.header.type == MT_DATA || m.header.type == MT_NOT_FOUND) {
+			MenuHandler();
 		}
 	}
 }
@@ -83,10 +86,10 @@ void Client()
 	t.detach();
 
 	Message m = Message::send(MR_BROKER, MT_INIT);
-
-	while (true)
+	boolean exit = false;
+	while (!exit)
 	{
-		MenuHandler();
+		exit = MenuHandler();
 	}
 }
 
