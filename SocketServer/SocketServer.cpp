@@ -43,7 +43,6 @@ void ProcessClient(SOCKET hSock,Server* server)
 	{
 		server->sessions.erase(m.header.from);
 		cout << "Exit";
-		Message::send(s, m.header.from, MR_BROKER, MT_CONFIRM);
 		break;
 	}
 	case MT_GETDATA:

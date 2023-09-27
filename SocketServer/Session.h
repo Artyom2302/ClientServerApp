@@ -28,7 +28,7 @@ public:
 		if (messages.empty())
 		{
 			Message::send(s, id, MR_BROKER,MT_NODATA);
-			if (abs(lastConnectionTime - time(NULL)) > 30) {
+			if (abs(lastConnectionTime - time(NULL)) > 15) {
 				messages.push(Message(id,MR_BROKER,MT_EXIT));
 			};
 		}

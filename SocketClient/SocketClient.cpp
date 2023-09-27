@@ -16,7 +16,7 @@ int EnterInt(int downBorder = 0, int upBorder = 1000) {
 	cin >> value;
 	while (cin.fail() && value >= downBorder && value <= upBorder) {
 		cin.clear();
-		cin.ignore('\n');
+		cin.ignore(32767,'\n');
 		cout << "Enter again:" << endl;
 		cin >> value;
 	};
@@ -26,9 +26,9 @@ int EnterInt(int downBorder = 0, int upBorder = 1000) {
 boolean MenuHandler() {
 	cout << "Enter client Id address(-1 to stop chat):"<<endl;
 	int adr = EnterInt(-1);
-	if (adr == -1) {
+	if (adr == -1 ) {
 		Message::send(MR_BROKER, MT_EXIT);
-		cout << "Exit";
+		cout << "Exit app"<<endl;
 		Sleep(2000);
 		return true;
 	}
@@ -39,19 +39,19 @@ boolean MenuHandler() {
 	return false;
 }
 
-void ProcessMessages()
+void ProcessMessages(boolean& exit)
 {
-	boolean exit  = false;
+	exit = false;
 	while (!exit)
 	{
 		Message m = Message::send(MR_BROKER, MT_GETDATA);
 		switch (m.header.type)
 		{
 		case MT_DATA:
-			cout <<endl<<"New message: "<< m.data << endl;
+			cout <<endl<<endl<<"New message: "<< m.data << endl;
 			break;
 		case MT_NOT_FOUND:
-			cout << "Client #"<<m.header.from-100<<" not found\n";
+			cout <<endl<<endl<< "Client #"<<m.header.from-100<<" not found\n";
 			break;
 		case MT_CONFIRM:{
 			break;
@@ -61,7 +61,9 @@ void ProcessMessages()
 			break;
 		}
 		case MT_EXIT:{
-			cout << "exit"<<endl;
+			cout << "Disconnect..." << endl;
+			Sleep(1000);
+			cout << "Enter -1 to close app"<<endl;
 			Message::send(MR_BROKER, MT_EXIT);
 			exit = true;
 			break;
@@ -71,7 +73,7 @@ void ProcessMessages()
 			break;
 		}
 		if (m.header.type == MT_DATA || m.header.type == MT_NOT_FOUND) {
-			MenuHandler();
+			cout << "Enter client Id address(-1 to stop chat):" << endl;
 		}
 	}
 }
@@ -81,15 +83,16 @@ void ProcessMessages()
 
 void Client()
 {
+	boolean exitServer = false,exitClient = false;
 	AfxSocketInit();
-	thread t(ProcessMessages);
+	thread t(ProcessMessages, std::ref(exitServer));
 	t.detach();
 
 	Message m = Message::send(MR_BROKER, MT_INIT);
-	boolean exit = false;
-	while (!exit)
+	
+	while (!(exitServer || exitClient))
 	{
-		exit = MenuHandler();
+		exitClient = MenuHandler();
 	}
 }
 
