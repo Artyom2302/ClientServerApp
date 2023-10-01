@@ -29,7 +29,7 @@ void ProcessClient(SOCKET hSock,Server* server)
 	s.Attach(hSock);
 	Message m;
 	int code = m.receive(s);
-	cout << m.header.to << ": " << m.header.from << ": " << m.header.type << ": " << code << endl;
+	//cout << m.header.to << ": " << m.header.from << ": " << m.header.type << ": " << code << endl;
 	switch (code)
 	{
 	case MT_INIT:
@@ -52,6 +52,17 @@ void ProcessClient(SOCKET hSock,Server* server)
 		{
 			iSession->second->send(s);
 		}
+		break;
+	}
+	case MT_GET_USERS: {
+		auto iSession = server->sessions.find(m.header.from);
+		string str = "Clients numbers: ";
+		for (auto eachSession:server->sessions) {
+			cout << eachSession.first + " ";
+			str.append(eachSession.first+" ");
+		}
+		Message mes = Message(m.header.from, MR_BROKER,MT_GET_USERS, str.c_str());
+		iSession->second->add(mes);
 		break;
 	}
 	default:

@@ -8,7 +8,8 @@ enum MessageTypes
 	MT_DATA,
 	MT_NODATA,
 	MT_CONFIRM,
-	MT_NOT_FOUND
+	MT_NOT_FOUND,
+	MT_GET_USERS
 };
 
 enum MessageRecipients
