@@ -22,6 +22,7 @@ void LaunchClient()
 }
 
 
+
 void ProcessClient(SOCKET hSock,Server* server)
 {
 	CSingleLock lock(&server->cs, TRUE);
@@ -29,20 +30,21 @@ void ProcessClient(SOCKET hSock,Server* server)
 	s.Attach(hSock);
 	Message m;
 	int code = m.receive(s);
-	//cout << m.header.to << ": " << m.header.from << ": " << m.header.type << ": " << code << endl;
 	switch (code)
 	{
 	case MT_INIT:
 	{
-		auto session = make_shared<Session>(++server->maxID, m.data);
+		cout << "Client#" << ++server->maxID-100 << " connect server" << endl;
+		auto session = make_shared<Session>(server->maxID, m.data);
 		server->sessions[session->id] = session;
 		Message::send(s, session->id, MR_BROKER, MT_INIT);
+		
 		break;
 	}
 	case MT_EXIT:
 	{
 		server->sessions.erase(m.header.from);
-		cout << "Exit";
+		cout << "Client#"<<m.header.from-100<<" disconnect server"<<endl;
 		break;
 	}
 	case MT_GETDATA:
@@ -56,10 +58,11 @@ void ProcessClient(SOCKET hSock,Server* server)
 	}
 	case MT_GET_USERS: {
 		auto iSession = server->sessions.find(m.header.from);
-		string str = "Clients numbers: ";
-		for (auto eachSession:server->sessions) {
-			cout << eachSession.first + " ";
-			str.append(eachSession.first+" ");
+		cout << "Client#" << m.header.from - 100 << " request a list of users" << endl;
+		string str = "All connected clients(id numbers): ";
+		for (auto const& [key, val] : server->sessions) {
+			if (key !=m.header.from)
+			str.append("#" + to_string(key - 100) + " ");
 		}
 		Message mes = Message(m.header.from, MR_BROKER,MT_GET_USERS, str.c_str());
 		iSession->second->add(mes);
@@ -75,6 +78,7 @@ void ProcessClient(SOCKET hSock,Server* server)
 			if (iSessionTo != server->sessions.end())
 			{
 				iSessionTo->second->add(m);
+				cout << "User #" << m.header.from-100<<" send to User #"<<m.header.to-100<< " message("<<m.data<<") "<<endl;
 			}
 			else if (m.header.to == MR_ALL)
 			{
@@ -83,10 +87,12 @@ void ProcessClient(SOCKET hSock,Server* server)
 					if (id != m.header.from)
 						session->add(m);
 				}
+				cout << "User #" << m.header.from-100 << " send " << m.header.to-100<< " message("<<m.data<<") to all " << endl;
 			}
 			else
 			{
 				iSessionFrom->second->add(Message(m.header.from, m.header.to, MT_NOT_FOUND));
+				cout << "User #" << m.header.from << "send message for non-existent user "<<endl;
 			}
 		}
 		

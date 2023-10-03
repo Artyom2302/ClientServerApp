@@ -35,14 +35,16 @@ void MessageHandler() {
 void GetUserList() {
 	Message m = Message::send(MR_BROKER, MT_GET_USERS);
 }
-boolean MenuHandler() {
+void printMenu() {
 	cout << "Enter: " << endl;
 	cout << "1)Send Message to users" << endl;
 	cout << "2)List of users" << endl;
 	cout << "3)Quit" << endl;
+}
+boolean MenuHandler() {
+	printMenu();
 	int choice = EnterInt(1,3);
 	boolean exitApp = false;
-
 	switch (choice)
 	{
 	case 1 :
@@ -53,8 +55,6 @@ boolean MenuHandler() {
 		break;
 	case 3:
 		Message::send(MR_BROKER, MT_EXIT);
-		cout << "Exit app" << endl;
-		Sleep(2000);
 		exitApp = true;
 		break;
 	default:
@@ -84,27 +84,19 @@ void ProcessMessages(boolean& exit)
 			break;
 		}
 		case MT_GET_USERS:{
-			cout << m.data<<endl;
+			cout << endl << m.data<<endl << endl;
 			break;
 		}
 		case MT_NODATA: {
 			Sleep(500);
 			break;
 		}
-		case MT_EXIT:{
-			cout << "Disconnect..." << endl;
-			Sleep(1000);
-			cout << "Enter -1 to close app"<<endl;
-			Message::send(MR_BROKER, MT_EXIT);
-			exit = true;
-			break;
-		}
 		default:
 			Sleep(500); 
 			break;
 		}
-		if (m.header.type == MT_DATA || m.header.type == MT_NOT_FOUND) {
-			cout << "Enter client Id address(-1 to stop chat or 0 to send this message for all):" << endl;
+		if (m.header.type == MT_DATA || m.header.type == MT_NOT_FOUND || m.header.type == MT_GET_USERS) {
+			printMenu();
 		}
 	}
 }
@@ -121,9 +113,9 @@ void Client()
 
 	Message m = Message::send(MR_BROKER, MT_INIT);
 	cout <<"Your id: " << m.clientID-100 << endl;
-	while (!(exitServer || exitClient))
+	while (!(exitServer))
 	{
-		MenuHandler();
+		exitServer = MenuHandler();
 	}
 }
 
