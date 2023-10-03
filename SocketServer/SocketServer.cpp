@@ -23,9 +23,9 @@ void LaunchClient()
 
 
 
-void ProcessClient(SOCKET hSock,Server* server)
+void ProcessClient(SOCKET hSock,Server& server)
 {
-	CSingleLock lock(&server->cs, TRUE);
+	CSingleLock lock(&server.cs, TRUE);
 	CSocket s;
 	s.Attach(hSock);
 	Message m;
@@ -34,33 +34,33 @@ void ProcessClient(SOCKET hSock,Server* server)
 	{
 	case MT_INIT:
 	{
-		cout << "Client#" << ++server->maxID-100 << " connect server" << endl;
-		auto session = make_shared<Session>(server->maxID, m.data);
-		server->sessions[session->id] = session;
+		cout << "Client#" << ++server.maxID-100 << " connect server" << endl;
+		auto session = make_shared<Session>(server.maxID, m.data);
+		server.sessions[session->id] = session;
 		Message::send(s, session->id, MR_BROKER, MT_INIT);
 		
 		break;
 	}
 	case MT_EXIT:
 	{
-		server->sessions.erase(m.header.from);
+		server.sessions.erase(m.header.from);
 		cout << "Client#"<<m.header.from-100<<" disconnect server"<<endl;
 		break;
 	}
 	case MT_GETDATA:
 	{
-		auto iSession = server->sessions.find(m.header.from);
-		if (iSession != server->sessions.end())
+		auto iSession = server.sessions.find(m.header.from);
+		if (iSession != server.sessions.end())
 		{
 			iSession->second->send(s);
 		}
 		break;
 	}
 	case MT_GET_USERS: {
-		auto iSession = server->sessions.find(m.header.from);
+		auto iSession = server.sessions.find(m.header.from);
 		cout << "Client#" << m.header.from - 100 << " request a list of users" << endl;
 		string str = "All connected clients(id numbers): ";
-		for (auto const& [key, val] : server->sessions) {
+		for (auto const& [key, val] : server.sessions) {
 			if (key !=m.header.from)
 			str.append("#" + to_string(key - 100) + " ");
 		}
@@ -70,19 +70,18 @@ void ProcessClient(SOCKET hSock,Server* server)
 	}
 	default:
 	{
-		auto iSessionFrom = server->sessions.find(m.header.from);
-		if (iSessionFrom != server->sessions.end())
+		auto iSessionFrom = server.sessions.find(m.header.from);
+		if (iSessionFrom != server.sessions.end())
 		{
-			iSessionFrom->second->lastConnectionTime = time(NULL);
-			auto iSessionTo = server->sessions.find(m.header.to);
-			if (iSessionTo != server->sessions.end())
+			auto iSessionTo = server.sessions.find(m.header.to);
+			if (iSessionTo != server.sessions.end())
 			{
 				iSessionTo->second->add(m);
 				cout << "User #" << m.header.from-100<<" send to User #"<<m.header.to-100<< " message("<<m.data<<") "<<endl;
 			}
 			else if (m.header.to == MR_ALL)
 			{
-				for (auto& [id, session] : server->sessions)
+				for (auto& [id, session] : server.sessions)
 				{
 					if (id != m.header.from)
 						session->add(m);
@@ -108,7 +107,7 @@ void ServerStart()
 	CSocket ServerSocket;
 	ServerSocket.Create(12345);
 	Server server;
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		LaunchClient();
 	}
@@ -119,7 +118,7 @@ void ServerStart()
 			break;
 		CSocket s;
 		ServerSocket.Accept(s);
-		thread t(ProcessClient, s.Detach(),&server);
+		thread t(ProcessClient, s.Detach(),ref(server));
 		t.detach();
 	}
 }

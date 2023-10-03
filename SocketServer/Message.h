@@ -32,8 +32,6 @@ class Message
 public:
 	MessageHeader header = {0};
 	string data;
-	static int clientID;
-
 	Message() {}
 	Message(int to, int from, int type = MT_DATA, const string& data = "")
 	{
@@ -66,6 +64,6 @@ public:
 	}
 
 	static void send(CSocket& s, int to, int from, int type = MT_DATA, const string& data = "");
-	static Message send(int to, int type = MT_DATA, const string& data = "");
+	static Message send(int to,int from, int type = MT_DATA, const string& data = "");
 };
 
