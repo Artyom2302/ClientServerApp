@@ -119,7 +119,8 @@ void Client::MessageHandler()
 		}
 		cout << endl << "Enter msg: " << endl;
 		string str;
-		cin >> str;
+		cin.get();
+		std::getline(cin, str);
 		Send(addr == 0 ? MR_ALL : addr + 100, MT_DATA, str);
 		return;
 }

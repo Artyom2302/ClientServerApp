@@ -94,5 +94,8 @@ void Server::Start()
 		ServerSocket.Accept(s);
 		thread t(&Server::ProcessClient,this, s.Detach());
 		t.detach();
+
+
+
 	}
 }
