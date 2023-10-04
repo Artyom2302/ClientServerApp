@@ -32,6 +32,7 @@ int main()
 		}
 		else
 		{
+			system("mode con cols=60 lines=25");
 			Client client;
 			client.Start();
 		}

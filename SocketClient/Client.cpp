@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Client.h"
 
-void Client::ProcessMessages(boolean& exit)
+void Client::ProcessMessages()
 {
 	exit = false;
 	while (!exit)
 	{
-		Message m = Message::send(MR_BROKER, MT_GETDATA);
+		Message m = Request(MT_GETDATA);
 		switch (m.header.type)
 		{
 		case MT_DATA:
@@ -42,9 +42,9 @@ void Client::Start()
 	boolean exitServer = false;
 	this->Initialize();
 	
-	thread t(ProcessMessages, std::ref(exitServer));
+	thread t(&Client::ProcessMessages,this);
 	t.detach();
-	cout << "Your id: " << id << endl;
+	cout << "Your id: " << id-100<< endl;
 	while (!(exitServer))
 	{
 		exitServer = MenuHandler();
@@ -53,7 +53,6 @@ void Client::Start()
 
 boolean Client::MenuHandler()
 {
-	{
 		printMenu();
 		int choice = EnterInt(1, 3);
 		boolean exitApp = false;
@@ -74,14 +73,25 @@ boolean Client::MenuHandler()
 		}
 		if (exitApp)
 			return true;
-	}
+	
 }
 
 void Client::Initialize()
 {
-	Message m = Message::send(MR_BROKER,0,MT_INIT);
+	Message m = Request(MT_INIT);
 	this->id = m.header.to;
 }
+
+Message Client::Request(int type)
+{
+	return Message::request(MR_BROKER, this->id, type, "");
+}
+
+void Client::Send(int to, int type, const string& data)
+{
+	Message::send(to, this->id, type, data);
+}
+
 
 int Client::EnterInt(int downBorder, int upBorder)
 {
@@ -99,17 +109,26 @@ int Client::EnterInt(int downBorder, int upBorder)
 void Client::MessageHandler()
 {
 		cout << "Enter client Id address(0 to send this message for all):" << endl;
-		int adr = EnterInt();
+		int addr = this->id;
+		while (true) {
+			addr = EnterInt();
+			if (addr+100 == this->id) {
+				cout << "Can't send message for yourself"<<endl;
+			}
+			else {
+				break;
+			}
+		}
 		cout << endl << "Enter msg: " << endl;
 		string str;
 		cin >> str;
-		//Message::send(adr == 0 ? MR_ALL : adr + 100, MT_DATA, str);
+		Send(addr == 0 ? MR_ALL : addr + 100, MT_DATA, str);
 		return;
 }
 
 void Client::GetUserList()
 {
-	Message m = Message::send(MR_BROKER, MT_GET_USERS);
+	Message m = Request(MT_GET_USERS);
 	
 }
 

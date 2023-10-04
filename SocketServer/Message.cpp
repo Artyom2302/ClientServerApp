@@ -23,17 +23,28 @@ void Message::send(CSocket& s, int to, int from, int type, const string& data)
 	m.send(s);
 }
 
-Message Message::send(int to,int from, int type, const string& data)
+Message Message::request(int to,int from, int type, const string& data)
 {
 	CSocket s;
 	s.Create();
 	while (!s.Connect("127.0.0.1", 12345)) {
 		cout << "Не удалось подключиться"<<endl;
 	}
-	
 	Message m(to, from, type, data);
 	m.send(s);
 	m.receive(s);
 	return m;
 }
+
+void Message::send(int to, int from, int type, const string& data)
+{
+	CSocket s;
+	s.Create();
+	while (!s.Connect("127.0.0.1", 12345)) {
+		cout << "Не удалось подключиться" << endl;
+	}
+	Message m(to, from, type, data);
+	m.send(s);
+}
+
 
