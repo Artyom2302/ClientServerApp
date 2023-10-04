@@ -26,9 +26,10 @@ void Message::send(CSocket& s, int to, int from, int type, const string& data)
 Message Message::request(int to,int from, int type, const string& data)
 {
 	CSocket s;
+	time_t timer = time(NULL);
 	s.Create();
 	while (!s.Connect("127.0.0.1", 12345)) {
-		cout << "Не удалось подключиться"<<endl;
+		cout << "Try to connect..." << endl;
 	}
 	Message m(to, from, type, data);
 	m.send(s);
@@ -41,7 +42,8 @@ void Message::send(int to, int from, int type, const string& data)
 	CSocket s;
 	s.Create();
 	while (!s.Connect("127.0.0.1", 12345)) {
-		cout << "Не удалось подключиться" << endl;
+		cout << "Try to connect..." << endl;
+
 	}
 	Message m(to, from, type, data);
 	m.send(s);

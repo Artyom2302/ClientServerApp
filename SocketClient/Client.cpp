@@ -39,15 +39,13 @@ void Client::ProcessMessages()
 void Client::Start()
 {
 	AfxSocketInit();
-	boolean exitServer = false;
 	this->Initialize();
-	
 	thread t(&Client::ProcessMessages,this);
 	t.detach();
 	cout << "Your id: " << id-100<< endl;
-	while (!(exitServer))
+	while (!(exit))
 	{
-		exitServer = MenuHandler();
+		exit = MenuHandler();
 	}
 }
 

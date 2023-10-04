@@ -3,19 +3,22 @@
 
 class Client
 {
-	int id;
-	bool exit;
+	private:
+	int id=0;
+	bool exit=false;
 
-
-	void MessageHandler();
-	void GetUserList();
 	static void printMenu();
 	static int EnterInt(int downBorder = 0, int upBorder = 1000);
-	void ProcessMessages();
+
 	boolean MenuHandler();
+	void MessageHandler();
+	void GetUserList();
+	void ProcessMessages();
+
 	void Initialize();
 	Message Request(int type);
-	void Send(int to,int type = MT_DATA,const string& data="");
+	void Send(int to,int type = MT_DATA,const string& data="");\
+
 public:
 	void Start();
 
