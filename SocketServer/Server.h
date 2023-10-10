@@ -20,6 +20,7 @@ public:
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
 	}
+	void CheckTimeOut();
 
 };
 
