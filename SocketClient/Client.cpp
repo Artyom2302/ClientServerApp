@@ -10,16 +10,12 @@ void Client::ProcessMessages()
 		switch (m.header.type)
 		{
 		case MT_DATA:
-			cout << endl << endl << "New message: " << m.data << endl;
+			cout << endl<<"Client #"<<m.header.from<< " : " << m.data << endl;
 			break;
 		case MT_NOT_FOUND:
-			cout << endl << endl << "Client #" << m.header.from - 100 << " not found\n";
+			cout << endl << endl << "Client #" << m.header.from << " not found\n";
 			break;
 		case MT_CONFIRM: {
-			break;
-		}
-		case MT_GET_USERS: {
-			cout << endl << m.data << endl << endl;
 			break;
 		}
 		case MT_NODATA: {
@@ -42,7 +38,7 @@ void Client::Start()
 	this->Initialize();
 	thread t(&Client::ProcessMessages,this);
 	t.detach();
-	cout << "Your id: " << id-100<< endl;
+	cout << "Your id: " << id<< endl;
 	while (!(exit))
 	{
 		exit = MenuHandler();
@@ -121,14 +117,14 @@ void Client::MessageHandler()
 		string str;
 		cin.get();
 		std::getline(cin, str);
-		Send(addr == 0 ? MR_ALL : addr + 100, MT_DATA, str);
+		Send(addr == 0 ? MR_ALL : addr, MT_DATA, str);
 		return;
 }
 
 void Client::GetUserList()
 {
 	Message m = Request(MT_GET_USERS);
-	
+	cout<<"Clients ids: " << m.data << endl;
 }
 
 void Client::printMenu()

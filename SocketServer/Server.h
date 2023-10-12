@@ -6,7 +6,7 @@
 class Server
 {
 public:
-	int maxID = MR_USER;
+	int maxID = MR_USER-1;
 	map<int, shared_ptr<Session>> sessions;
 	CCriticalSection cs;
 	CSocket ServerSocket;
@@ -17,10 +17,13 @@ public:
 		STARTUPINFO si = { sizeof(si) };
 		PROCESS_INFORMATION pi;
 		CreateProcess(NULL, (LPSTR)"SocketClient.exe", NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+		CreateProcess(NULL, (LPSTR)"Debug/net7.0-windows/SharpSocketClient.exe", NULL, NULL, TRUE, NULL, NULL, NULL, &si, &pi);
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
+		
 	}
 	void CheckTimeOut();
+	void UpdateUserList();
 
 };
 

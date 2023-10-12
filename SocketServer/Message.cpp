@@ -43,7 +43,6 @@ void Message::send(int to, int from, int type, const string& data)
 	s.Create();
 	while (!s.Connect("127.0.0.1", 12345)) {
 		cout << "Try to connect..." << endl;
-
 	}
 	Message m(to, from, type, data);
 	m.send(s);

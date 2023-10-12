@@ -8,15 +8,16 @@ enum MessageTypes
 	MT_DATA,
 	MT_NODATA,
 	MT_CONFIRM,
+	MT_GET_USERS,
 	MT_NOT_FOUND,
-	MT_GET_USERS
+	
 };
 
 enum MessageRecipients
 {
-	MR_BROKER = 10,
-	MR_ALL = 50,
-	MR_USER = 100
+	MR_BROKER = -1,
+	MR_ALL = 0,
+	MR_USER = 1,
 };
 
 struct MessageHeader
