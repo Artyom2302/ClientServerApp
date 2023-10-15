@@ -18,7 +18,9 @@ namespace SharpClient
 		MT_NODATA,
 		MT_CONFIRM,
 		MT_GET_USERS,
-        MT_NOT_FOUND
+        MT_NOT_FOUND,
+        MT_ADD_USER,
+        MT_DELETE_USER
     };
 
 	public enum MessageRecipients: int

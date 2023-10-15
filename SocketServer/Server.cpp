@@ -20,10 +20,12 @@ void Server::ProcessClient(SOCKET hSock)
 		auto session = make_shared<Session>(id, m.data);
 		sessions[session->id] = session;
 		Message::send(s, session->id, MR_BROKER, MT_INIT);
+		AddUserToList(id);
 		break;
 	}
 	case MT_EXIT:
 	{
+		DeleteUserFromList(m.header.from);
 		sessions.erase(m.header.from);
 		cout << "Client#" << m.header.from << " disconnect server" << endl;
 		break;
@@ -95,10 +97,31 @@ void Server::CheckTimeOut()
 				}
 			};
 			for (auto const& key : keysForDelete) {
+				DeleteUserFromList(key);
 				sessions.erase(key);
 				cout << "Client #" << key<< " lose connection"<<endl;
 			}
 		}
+}
+
+void Server::AddUserToList(int userId)
+{
+	for (auto const& [key, val] : sessions) {
+		if (key != userId) {
+			Message m = Message(key, MR_BROKER, MT_ADD_USER, to_string(userId));
+			val->add(m);
+		};
+	};
+}
+
+void Server::DeleteUserFromList(int userId)
+{
+	for (auto const& [key, val] : sessions) {
+		if (key != userId) {
+			Message m = Message(key, MR_BROKER, MT_DELETE_USER, to_string(userId));
+			val->add(m);
+		}
+	};
 }
 
 

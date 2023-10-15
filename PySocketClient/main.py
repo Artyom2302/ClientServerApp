@@ -26,6 +26,7 @@ class Ui_mainWindow(object):
 
     def setupUi(self, mainWindow):
         self.id = 0
+        self.exit = False
         mainWindow.setObjectName("mainWindow")
         mainWindow.setWindowModality(QtCore.Qt.ApplicationModal)
         mainWindow.setCursor(QtGui.QCursor(QtCore.Qt.UpArrowCursor))
@@ -44,9 +45,6 @@ class Ui_mainWindow(object):
         self.chatBox.setEnabled(False)
         self.chatBox.setGeometry(QtCore.QRect(50, 50, 201, 131))
         self.chatBox.setObjectName("chatBox")
-        self.updateBtn = QtWidgets.QPushButton(self.centralwidget)
-        self.updateBtn.setGeometry(QtCore.QRect(430, 150, 71, 31))
-        self.updateBtn.setObjectName("updateBtn")
         self.messageBox = QtWidgets.QTextEdit(self.centralwidget)
         self.messageBox.setEnabled(True)
         self.messageBox.setGeometry(QtCore.QRect(350, 80, 151, 61))
@@ -72,7 +70,6 @@ class Ui_mainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
         self.initialize()
         self.sendBtn.clicked.connect(self.SendMessage)
-        self.updateBtn.clicked.connect(self.GetUserList)
         t = threading.Thread(target=self.ProcessMessages)
         t.start()
 
@@ -81,12 +78,12 @@ class Ui_mainWindow(object):
         mesg.setText(text)
         mesg.setIcon(QMessageBox.Warning)
         mesg.exec_()
-
+    def close(self):
+        self.exit = True
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "PySocketClient"))
         self.sendBtn.setText(_translate("mainWindow", "Send"))
-        self.updateBtn.setText(_translate("mainWindow", "Update"))
         self.chatLabel.setText(_translate("mainWindow", "Chat"))
         self.chatLabel_2.setText(_translate("mainWindow", "Client Address"))
         self.chatLabel_3.setText(_translate("mainWindow", "Message"))
@@ -100,32 +97,45 @@ class Ui_mainWindow(object):
         self.UsersList.clear()
         m = self.Request(msg.MT_GET_USERS)
         ids = m.Data.split(' ')
+        self.UsersList.addItem("All users")
         for item in ids:
             if item != "":
                 self.UsersList.addItem(item)
 
     def ProcessMessages(self):
-        while True:
+        while not self.exit:
             m = self.Request(msg.MT_GETDATA)
             if m.Header.Type == msg.MT_DATA:
                 self.chatBox.append(str(m.Header.From)+": " + m.Data + "\n")
             elif m.Header.Type == msg.MT_NOT_FOUND:
                 self.ShowInfo("Client do not exist, try to update list of users")
+            elif m.Header.Type == msg.MT_ADD_USER:
+                self.UsersList.addItem(m.Data)
+            elif m.Header.Type == msg.MT_DELETE_USER:
+                print(m.Data)
+                index = self.UsersList.findText(m.Data)
+                print(index)
+                self.UsersList.removeItem(index)
             else:
                 time.sleep(1)
 
-
+    # def DeleteUser(self,id):
+    #     for i in range(0,self.UsersList.count()):
+    #         if id == self.UsersList.
     def SendMessage(self):
-
         if self.messageBox.toPlainText() != "":
-            self.Send(int(self.UsersList.currentText()), self.id, msg.MT_DATA, self.messageBox.toPlainText())
+            if self.UsersList.currentText() == "All users":
+                self.Send(msg.MR_ALL, self.id, msg.MT_DATA, self.messageBox.toPlainText())
+            else:
+                self.Send(int(self.UsersList.currentText()), self.id, msg.MT_DATA, self.messageBox.toPlainText())
         else:
             self.ShowInfo("Enter message")
 
 
+
+
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
     ui = Ui_mainWindow()

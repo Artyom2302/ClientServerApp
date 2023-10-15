@@ -35,7 +35,6 @@
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
-            button2 = new Button();
             SuspendLayout();
             // 
             // ChatBox
@@ -46,7 +45,6 @@
             ChatBox.ReadOnly = true;
             ChatBox.Size = new Size(184, 120);
             ChatBox.TabIndex = 0;
-            ChatBox.TextChanged += ChatBox_TextChanged;
             // 
             // EnterBox
             // 
@@ -58,7 +56,7 @@
             // 
             // button1
             // 
-            button1.Location = new Point(320, 131);
+            button1.Location = new Point(365, 131);
             button1.Name = "button1";
             button1.Size = new Size(75, 30);
             button1.TabIndex = 2;
@@ -73,7 +71,6 @@
             UsersBox.Name = "UsersBox";
             UsersBox.Size = new Size(164, 23);
             UsersBox.TabIndex = 3;
-            UsersBox.UseWaitCursor = true;
             // 
             // label1
             // 
@@ -102,22 +99,11 @@
             label3.TabIndex = 6;
             label3.Text = "Message";
             // 
-            // button2
-            // 
-            button2.Location = new Point(408, 132);
-            button2.Name = "button2";
-            button2.Size = new Size(69, 29);
-            button2.TabIndex = 7;
-            button2.Text = "Update";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
-            // 
             // ClientForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(496, 176);
-            Controls.Add(button2);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -127,6 +113,7 @@
             Controls.Add(ChatBox);
             Name = "ClientForm";
             Text = "Form1";
+            FormClosing += ClientForm_FormClosing;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -140,6 +127,5 @@
         private Label label1;
         private Label label2;
         private Label label3;
-        private Button button2;
     }
 }

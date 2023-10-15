@@ -14,16 +14,19 @@ public:
 	void Start();
 	void LaunchClient()
 	{
-		STARTUPINFO si = { sizeof(si) };
-		PROCESS_INFORMATION pi;
+		/*STARTUPINFO si = { sizeof(si) };
+		STARTUPINFO si1 = { sizeof(si1) };
+		PROCESS_INFORMATION pi,pi1;
 		CreateProcess(NULL, (LPSTR)"SocketClient.exe", NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
-		CreateProcess(NULL, (LPSTR)"Debug/net7.0-windows/SharpSocketClient.exe", NULL, NULL, TRUE, NULL, NULL, NULL, &si, &pi);
+		CreateProcess(NULL, (LPSTR)"Debug/net7.0-windows/SharpSocketClient.exe", NULL, NULL, TRUE, NULL, NULL, NULL, &si1, &pi1);
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
-		
+		CloseHandle(pi1.hThread);
+		CloseHandle(pi1.hProcess);*/
 	}
 	void CheckTimeOut();
-	void UpdateUserList();
+	void AddUserToList(int userId);
+	void DeleteUserFromList(int userId);
 
 };
 

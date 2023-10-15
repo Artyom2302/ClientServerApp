@@ -6,6 +6,7 @@ namespace SharpSocketClient
     public partial class ClientForm : Form
     {
         MessageRecipients id = 0;
+        bool exit = false;
 
 
         public ClientForm()
@@ -33,6 +34,7 @@ namespace SharpSocketClient
         void GetUserList()
         {
             UsersBox.Items.Clear();
+            UsersBox.Items.Add("All users");
             Message m = request(MessageTypes.MT_GET_USERS);
             String[] ids = m.data.Split(' ');
             foreach (var idClients in ids)
@@ -41,24 +43,32 @@ namespace SharpSocketClient
                 {
                     UsersBox.Items.Add(idClients);
                 }
-
             }
         }
         void ProcessMessages()
         {
-
-            while (true)
+            while (!exit)
             {
                 var m = request(MessageTypes.MT_GETDATA);
                 switch (m.header.type)
                 {
                     case MessageTypes.MT_DATA:
                         ChatBox.AppendText((m.header.from).ToString() + ":");
-                        ChatBox.AppendText(m.data+"\n");
+                        ChatBox.AppendText(m.data + "\n");
                         break;
                     case MessageTypes.MT_NOT_FOUND:
                         {
                             MessageBox.Show("User already do not exist, update list of users");
+                            break;
+                        }
+                    case MessageTypes.MT_ADD_USER:
+                        {
+                            UsersBox.Items.Add(m.data);
+                            break;
+                        }
+                    case MessageTypes.MT_DELETE_USER:
+                        {
+                            UsersBox.Items.Remove(m.data);
                             break;
                         }
                     default:
@@ -73,23 +83,28 @@ namespace SharpSocketClient
         {
             var s = EnterBox.Text;
             if (s == "")
+            {
                 MessageBox.Show("Enter message");
+                return;
+            }
+
 
             if (s is not null && UsersBox.SelectedIndex != -1)
             {
-
-                send((MessageRecipients)(int.Parse((string)UsersBox.SelectedItem)), id, MessageTypes.MT_DATA, s);
+                if ((string)UsersBox.SelectedItem == "All users")
+                {
+                    send(MessageRecipients.MR_ALL, id, MessageTypes.MT_DATA, s);
+                }
+                else
+                    send((MessageRecipients)(int.Parse((string)UsersBox.SelectedItem)), id, MessageTypes.MT_DATA, s);
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            GetUserList();
-        }
 
-        private void ChatBox_TextChanged(object sender, EventArgs e)
-        {
 
+        private void ClientForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            exit = true;
         }
     }
 }
