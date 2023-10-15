@@ -88,8 +88,9 @@ void Server::ProcessClient(SOCKET hSock)
 
 void Server::CheckTimeOut()
 {
-	set<int> keysForDelete;
-
+	while (true)
+	{
+		set<int> keysForDelete;
 		if (sessions.size()) {
 			for (auto const& [key, val] : sessions) {
 				if (abs(val->lastConnectionTime - time(NULL)) > 5) {
@@ -99,9 +100,12 @@ void Server::CheckTimeOut()
 			for (auto const& key : keysForDelete) {
 				DeleteUserFromList(key);
 				sessions.erase(key);
-				cout << "Client #" << key<< " lose connection"<<endl;
+				cout << "Client #" << key << " lose connection" << endl;
 			}
 		}
+		Sleep(500);
+	}
+	
 }
 
 void Server::AddUserToList(int userId)
@@ -141,7 +145,8 @@ void Server::Start()
 		ServerSocket.Accept(s);
 		thread t(&Server::ProcessClient,this, s.Detach());
 		t.detach();
-		this->CheckTimeOut();
+		thread timeout(&Server::CheckTimeOut, this);
+		timeout.detach();
 	}
 }
 

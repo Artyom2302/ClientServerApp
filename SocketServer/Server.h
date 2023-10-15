@@ -14,7 +14,7 @@ public:
 	void Start();
 	void LaunchClient()
 	{
-		/*STARTUPINFO si = { sizeof(si) };
+		STARTUPINFO si = { sizeof(si) };
 		STARTUPINFO si1 = { sizeof(si1) };
 		PROCESS_INFORMATION pi,pi1;
 		CreateProcess(NULL, (LPSTR)"SocketClient.exe", NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
@@ -22,7 +22,7 @@ public:
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi1.hThread);
-		CloseHandle(pi1.hProcess);*/
+		CloseHandle(pi1.hProcess);
 	}
 	void CheckTimeOut();
 	void AddUserToList(int userId);

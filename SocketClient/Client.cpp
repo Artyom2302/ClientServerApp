@@ -65,9 +65,7 @@ boolean Client::MenuHandler()
 		default:
 			break;
 		}
-		if (exitApp)
-			return true;
-	
+		return exitApp;
 }
 
 void Client::Initialize()

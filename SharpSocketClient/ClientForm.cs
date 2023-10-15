@@ -1,4 +1,5 @@
 using SharpClient;
+using System.Text;
 using Message = SharpClient.Message;
 
 namespace SharpSocketClient
@@ -53,8 +54,9 @@ namespace SharpSocketClient
                 switch (m.header.type)
                 {
                     case MessageTypes.MT_DATA:
-                        ChatBox.AppendText((m.header.from).ToString() + ":");
-                        ChatBox.AppendText(m.data + "\n");
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.AppendLine((m.header.from).ToString() + ":" + m.data);
+                        ChatBox.AppendText(stringBuilder.ToString());
                         break;
                     case MessageTypes.MT_NOT_FOUND:
                         {
@@ -63,12 +65,14 @@ namespace SharpSocketClient
                         }
                     case MessageTypes.MT_ADD_USER:
                         {
+                            if(!UsersBox.Items.Contains(m.data))
                             UsersBox.Items.Add(m.data);
                             break;
                         }
                     case MessageTypes.MT_DELETE_USER:
                         {
-                            UsersBox.Items.Remove(m.data);
+                            if (!UsersBox.Items.Contains(m.data))
+                                UsersBox.Items.Remove(m.data);
                             break;
                         }
                     default:
