@@ -16,9 +16,9 @@ enum MessageTypes
 
 enum MessageRecipients
 {
-	MR_BROKER = -1,
-	MR_ALL = 0,
-	MR_USER = 1,
+	MR_BROKER = -2,
+	MR_ALL = -1,
+	MR_USER = 0,
 };
 
 struct MessageHeader

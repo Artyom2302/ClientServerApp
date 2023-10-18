@@ -5,12 +5,15 @@
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>228</height>
+    <width>534</width>
+    <height>232</height>
    </rect>
   </property>
   <property name="cursor">
@@ -54,6 +57,12 @@
       <width>201</width>
       <height>131</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="tabletTracking">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QTextEdit" name="messageBox">
@@ -114,7 +123,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>536</width>
+     <width>534</width>
      <height>21</height>
     </rect>
    </property>

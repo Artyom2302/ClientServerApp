@@ -7,6 +7,7 @@ namespace SharpSocketClient
     public partial class ClientForm : Form
     {
         MessageRecipients id = 0;
+        Thread t;
         bool exit = false;
 
 
@@ -14,9 +15,9 @@ namespace SharpSocketClient
         {
             InitializeComponent();
             Initialize();
-            Thread t = new Thread(ProcessMessages);
-            t.Start();
             this.Text = "User #" + (id);
+            this.t = new Thread(this.ProcessMessages);
+            this.t.Start();
         }
 
         Message request(MessageTypes type)
@@ -46,7 +47,7 @@ namespace SharpSocketClient
                 }
             }
         }
-        void ProcessMessages()
+        public void ProcessMessages()
         {
             while (!exit)
             {
@@ -65,21 +66,23 @@ namespace SharpSocketClient
                         }
                     case MessageTypes.MT_ADD_USER:
                         {
-                            if(!UsersBox.Items.Contains(m.data))
-                            UsersBox.Items.Add(m.data);
+                            if (!UsersBox.Items.Contains(m.data))
+                                UsersBox.Items.Add(m.data);
                             break;
                         }
                     case MessageTypes.MT_DELETE_USER:
                         {
-                            if (!UsersBox.Items.Contains(m.data))
+                            if (UsersBox.Items.Contains(m.data))
                                 UsersBox.Items.Remove(m.data);
                             break;
                         }
+                   
                     default:
                         Thread.Sleep(500);
                         break;
                 }
             }
+
         }
 
 
@@ -108,7 +111,13 @@ namespace SharpSocketClient
 
         private void ClientForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            send(MessageRecipients.MR_BROKER,id,MessageTypes.MT_EXIT);
             exit = true;
+            t.Join();
+        }
+
+        private void ClientForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
         }
     }
 }

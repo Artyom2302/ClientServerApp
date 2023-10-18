@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
             self.ShowInfo("Enter message")
 
     def closeEvent(self, event):
+        self.Send(msg.MR_BROKER, self.id, msg.MT_EXIT)
         self.exit = True
 
 

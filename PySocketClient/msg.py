@@ -13,9 +13,9 @@ MT_NOT_FOUND = 7
 MT_ADD_USER = 8
 MT_DELETE_USER = 9
 
-MR_BROKER = -1
-MR_ALL = 0
-MR_USER = 1
+MR_BROKER = -2
+MR_ALL = -1
+MR_USER = 0
 
 
 @dataclass

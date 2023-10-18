@@ -121,10 +121,11 @@ void Server::AddUserToList(int userId)
 void Server::DeleteUserFromList(int userId)
 {
 	for (auto const& [key, val] : sessions) {
+		
 		if (key != userId) {
-			Message m = Message(key, MR_BROKER, MT_DELETE_USER, to_string(userId));
+			Message m = Message(key, MR_BROKER, MT_DELETE_USER, to_string(userId));\
 			val->add(m);
-		}
+		}	
 	};
 }
 

@@ -114,6 +114,7 @@
             Name = "ClientForm";
             Text = "Form1";
             FormClosing += ClientForm_FormClosing;
+            FormClosed += ClientForm_FormClosed;
             ResumeLayout(false);
             PerformLayout();
         }

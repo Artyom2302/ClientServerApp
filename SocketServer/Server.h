@@ -6,7 +6,7 @@
 class Server
 {
 public:
-	int maxID = MR_USER-1;
+	int maxID = MR_USER;
 	map<int, shared_ptr<Session>> sessions;
 	CCriticalSection cs;
 	CSocket ServerSocket;

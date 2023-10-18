@@ -19,7 +19,7 @@ void Client::ProcessMessages()
 			break;
 		}
 		case MT_NODATA: {
-			Sleep(500);
+			Sleep(2500);
 			break;
 		}
 		default:
@@ -59,7 +59,7 @@ boolean Client::MenuHandler()
 			GetUserList();
 			break;
 		case 3:
-			Message::send(MR_BROKER, MT_EXIT);
+			Message::send(MR_BROKER,id,MT_EXIT);
 			exitApp = true;
 			break;
 		default:
@@ -104,7 +104,7 @@ void Client::MessageHandler()
 		int addr = this->id;
 		while (true) {
 			addr = EnterInt();
-			if (addr+100 == this->id) {
+			if (addr == this->id) {
 				cout << "Can't send message for yourself"<<endl;
 			}
 			else {
