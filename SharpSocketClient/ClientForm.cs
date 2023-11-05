@@ -76,7 +76,7 @@ namespace SharpSocketClient
                                 UsersBox.Items.Remove(m.data);
                             break;
                         }
-                   
+
                     default:
                         Thread.Sleep(500);
                         break;
@@ -111,7 +111,7 @@ namespace SharpSocketClient
 
         private void ClientForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            send(MessageRecipients.MR_BROKER,id,MessageTypes.MT_EXIT);
+            send(MessageRecipients.MR_BROKER, id, MessageTypes.MT_EXIT);
             exit = true;
             t.Join();
         }

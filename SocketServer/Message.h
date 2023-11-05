@@ -11,11 +11,14 @@ enum MessageTypes
 	MT_GET_USERS,
 	MT_NOT_FOUND,
 	MT_ADD_USER,
-	MT_DELETE_USER
+	MT_DELETE_USER,
+	MT_STORAGE_INIT,
+	MT_LOAD_MESSAGES
 };
 
 enum MessageRecipients
 {
+	MR_STORAGE = -3,
 	MR_BROKER = -2,
 	MR_ALL = -1,
 	MR_USER = 0,

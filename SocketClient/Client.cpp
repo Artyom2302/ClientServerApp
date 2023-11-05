@@ -22,6 +22,7 @@ void Client::ProcessMessages()
 			Sleep(2500);
 			break;
 		}
+
 		default:
 			Sleep(500);
 			break;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Server.h"
-#include <set>
+#include <unordered_set>
+
 
 void Server::ProcessClient(SOCKET hSock)
 {
@@ -10,17 +11,24 @@ void Server::ProcessClient(SOCKET hSock)
 
 	Message m;
 	int code = m.receive(s);
+	cout << m.header.from << " : " << m.header.type << endl;
 	switch (code)
 	{
 	case MT_INIT:
 	{
-
 		int id = ++maxID;
 		cout << "Client#" << id << " connect server" << endl;
 		auto session = make_shared<Session>(id, m.data);
 		sessions[session->id] = session;
 		Message::send(s, session->id, MR_BROKER, MT_INIT);
 		AddUserToList(id);
+		break;
+	}
+	case MT_STORAGE_INIT: {
+		cout << "Storage connected"<< endl;
+		auto session = make_shared<Session>(MR_STORAGE, m.data);
+		sessions[MR_STORAGE] = session;
+		Message::send(s,MR_STORAGE, MR_BROKER, MT_INIT);
 		break;
 	}
 	case MT_EXIT:
@@ -32,7 +40,6 @@ void Server::ProcessClient(SOCKET hSock)
 	}
 	case MT_GETDATA:
 	{
-		
 		auto iSession = sessions.find(m.header.from);
 		if (iSession != sessions.end())
 		{
@@ -54,8 +61,25 @@ void Server::ProcessClient(SOCKET hSock)
 		}
 		break;
 	}
+	case MT_LOAD_MESSAGES: {
+		if (m.header.from == MR_STORAGE) {
+			auto iSession = sessions.find(m.header.to);
+			m.header.to = MT_DATA;
+			m.send(s);
+		}
+		else {
+			auto storageSession = sessions.find(MR_STORAGE);
+			if (storageSession != sessions.end()) {
+				m.send(s);
+				storageSession->second->add(m);
+			}
+		};
+		
+		break;
+	}
 	default:
 	{
+		auto storageSession = sessions.find(MR_STORAGE);
 		auto iSessionFrom = sessions.find(m.header.from);
 		if (iSessionFrom != sessions.end())
 		{
@@ -64,6 +88,8 @@ void Server::ProcessClient(SOCKET hSock)
 			{
 				iSessionTo->second->add(m);
 				cout << "User #" << m.header.from<< " send to User #" << m.header.to << " message(" << m.data << ") " << endl;
+				if (storageSession != sessions.end() && m.header.from!= storageSession->first)
+					storageSession->second->add(m);
 			}
 			else if (m.header.to == MR_ALL)
 			{
@@ -72,7 +98,7 @@ void Server::ProcessClient(SOCKET hSock)
 					if (id != m.header.from)
 						session->add(m);
 				}
-				cout << "User #" << m.header.from << " send " << m.header.to << " message(" << m.data << ") to all " << endl;
+				cout << "User #" << m.header.from << " send " << " message(" << m.data << ") to all " << endl;
 			}
 			else
 			{
@@ -90,17 +116,19 @@ void Server::CheckTimeOut()
 {
 	while (true)
 	{
-		set<int> keysForDelete;
+		unordered_set<int> keysForDelete;
 		if (sessions.size()) {
 			for (auto const& [key, val] : sessions) {
-				if (abs(val->lastConnectionTime - time(NULL)) > 5) {
+				//cout <<key<<": "<< abs(val->lastConnectionTime - time(NULL)) << endl;
+				auto timeout = abs(val->lastConnectionTime - time(NULL)) ;
+				if (timeout > 50) {
 					keysForDelete.insert(key);
 				}
 			};
-			for (auto const& key : keysForDelete) {
+			for (auto  key : keysForDelete) {
+				cout << "Client #" << key << " lose connection" << endl;
 				DeleteUserFromList(key);
 				sessions.erase(key);
-				cout << "Client #" << key << " lose connection" << endl;
 			}
 		}
 		Sleep(500);
@@ -123,7 +151,7 @@ void Server::DeleteUserFromList(int userId)
 	for (auto const& [key, val] : sessions) {
 		
 		if (key != userId) {
-			Message m = Message(key, MR_BROKER, MT_DELETE_USER, to_string(userId));\
+			Message m = Message(key, MR_BROKER, MT_DELETE_USER, to_string(userId));
 			val->add(m);
 		}	
 	};
@@ -134,10 +162,8 @@ void Server::Start()
 {
 	AfxSocketInit();
 	ServerSocket.Create(12345);
-	for (int i = 0; i < 1; ++i)
-	{
-		LaunchClient();
-	}
+	thread timeout(&Server::CheckTimeOut, this);
+	timeout.detach();
 	while (true)
 	{
 		if (!ServerSocket.Listen())
@@ -146,8 +172,6 @@ void Server::Start()
 		ServerSocket.Accept(s);
 		thread t(&Server::ProcessClient,this, s.Detach());
 		t.detach();
-		thread timeout(&Server::CheckTimeOut, this);
-		timeout.detach();
 	}
 }
 

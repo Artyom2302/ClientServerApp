@@ -9,6 +9,11 @@ public:
 	time_t lastConnectionTime;
 
 	CCriticalSection cs;
+	Session()
+		:id(-100), name("Empty session"), lastConnectionTime(time(NULL))
+	{
+
+	}
 	Session(int _id, string _name)
 		:id(_id), name(_name), lastConnectionTime(time(NULL))
 	{
