@@ -67,7 +67,6 @@ public:
 		}
 		return header.type;
 	}
-
 	static void send(CSocket& s, int to, int from, int type = MT_DATA, const string& data = "");
 	static Message request(int to,int from, int type = MT_DATA, const string& data = "");
 	static void send(int to, int from, int type = MT_DATA, const string& data = "");

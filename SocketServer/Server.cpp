@@ -64,8 +64,7 @@ void Server::ProcessClient(SOCKET hSock)
 	case MT_LOAD_MESSAGES: {
 		if (m.header.from == MR_STORAGE) {
 			auto iSession = sessions.find(m.header.to);
-			m.header.to = MT_DATA;
-			m.send(s);
+			iSession->second->add(m);
 		}
 		else {
 			auto storageSession = sessions.find(MR_STORAGE);
@@ -119,7 +118,6 @@ void Server::CheckTimeOut()
 		unordered_set<int> keysForDelete;
 		if (sessions.size()) {
 			for (auto const& [key, val] : sessions) {
-				//cout <<key<<": "<< abs(val->lastConnectionTime - time(NULL)) << endl;
 				auto timeout = abs(val->lastConnectionTime - time(NULL)) ;
 				if (timeout > 50) {
 					keysForDelete.insert(key);
