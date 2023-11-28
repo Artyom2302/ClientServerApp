@@ -1,0 +1,139 @@
+<html>
+<head>
+    <title>Messages</title>
+    <meta charset="utf-8">
+    <style>
+
+        .content{
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id='client-id'>
+        client #
+    </div>
+    <input type="text" id="message-input" placeholder="Enter message">
+    <select name="client-ids" id="client-ids">
+
+    </select>
+    <input type="hidden" id ="hidden-value" value="0">
+    <button id="send-button">send</button>
+    <div>Message</div>
+    <div id='messageBox' class="content"></div>
+    <div>Messages history</div>
+    <div id='messagesHistory' class="content"></div>
+    <button id ="load-button">Load</button>
+    <script>
+document.getElementById("send-button").addEventListener("click", function() {
+    sendMessage();
+});
+document.getElementById("load-button").addEventListener("click", function() {
+    loadMessage();
+});
+initialize();
+function loadMessage(){
+    var id = document.getElementById("client-id").value;
+    fetch(createURL('load'))
+    .then(function(response){
+        console.log(response);
+       return response.text();
+    })
+    .then(function(data){
+        console.log(data)
+    });
+}
+
+function createURL(type,message = ''){
+        return '/cgi-bin/webClient.py?type='+type+'&message=' + encodeURIComponent(message)+'&id=' + document.getElementById("hidden-value").value;
+}
+function createSendURL(type,message = '',idTo){
+        return createURL(type,message)+'&idTo='+idTo
+}
+function initialize(){
+        fetch(createURL('init'))
+        .then(function(response) {
+            console.log(response);
+            return response.text();
+        })
+        .then(function(data) {
+            document.getElementById("client-id").innerHTML +=data;
+            document.getElementById("hidden-value").value = data;
+            getUserList();
+        })
+        .catch(function(error) {
+            console.error('Произошла ошибка:', error);
+        });
+
+}
+function sendMessage() {
+    var message = document.getElementById("message-input").value;
+    var id = document.getElementById("client-ids").value;
+    console.log(id)
+    fetch(createSendURL('send',message,id))
+    .then(function(response){
+        console.log(response);
+       return response.text();
+    })
+    .then(function(data){
+        document.getElementById("messageBox").innerHTML +=data;
+    });
+    getUserList();
+}
+function getMessage() {
+    fetch(createURL('get'))
+    .then(function(response) {
+            console.log(response);
+            return response.text();
+        })
+        .then(function(data) {
+            if (data != ""){
+            str = data.split(' ');
+            const startIndex = data.indexOf("[{");
+            const jsonSubstring = data.substring(startIndex);
+            const fixedJsonString = jsonSubstring.replace(/'/g, '"');
+            if (str[0] == 3){
+                document.getElementById("messageBox").innerHTML +=data.slice(1) +"<br>";
+                }
+                else {
+                    console.log(jsonSubstring)
+                    console.log(JSON.parse(fixedJsonString));
+                     document.getElementById("messagesHistory").innerHTML = "";
+                    array = JSON.parse(fixedJsonString)
+                    array.forEach(item => {
+                        document.getElementById("messagesHistory").innerHTML +=(`Client #${item.from} send to client #${item.to == -1 ? 'all' : item.to} message: ${item.message}`)+"<br>";
+                    });
+                }
+
+            }
+
+        })
+        .catch(function(error) {
+            console.error('Произошла ошибка:', error);
+        });
+}
+function getUserList(){
+    fetch(createURL('getUserList'))
+    .then(function(response) {
+            console.log(response);
+            return response.text();
+    })
+    .then(function(data) {
+            list =document.getElementById('client-ids');
+            list.innerHTML=" <option value='-1'>All users</option>"
+            var partsArray = data.split(' ');
+            partsArray.forEach(element => {
+            if (element!=''){
+            list.innerHTML +="<option value="+element+">"+element+"</option>";
+            }
+            });
+        })
+        .catch(function(error) {
+            console.error('Произошла ошибка:', error);
+        });
+
+}
+setInterval(getMessage, 1000);
+    </script>
+</body>
+</html>

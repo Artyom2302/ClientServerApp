@@ -12,7 +12,10 @@ MT_GET_USERS = 6
 MT_NOT_FOUND = 7
 MT_ADD_USER = 8
 MT_DELETE_USER = 9
+MT_STORAGE_INIT = 10
+MT_LOAD_MESSAGES = 11
 
+MR_STORAGE = -3
 MR_BROKER = -2
 MR_ALL = -1
 MR_USER = 0
@@ -44,9 +47,9 @@ class Message:
 
     def Send(self, s):
         self.Header.Send(s)
-
         if self.Header.Size > 0:
             s.send(struct.pack(f'{self.Header.Size}s', self.Data.encode('cp866')))
+            print(self.Data.encode('cp866'))
 
     def Receive(self, s):
         self.Header.Receive(s)

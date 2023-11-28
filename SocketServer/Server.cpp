@@ -54,7 +54,7 @@ void Server::ProcessClient(SOCKET hSock)
 			cout << "Client#" << m.header.from << " request a list of users" << endl;
 			string str = "";
 			for (auto const& [key, val] : sessions) {
-				if (key != m.header.from)
+				if (key != m.header.from && key != MR_STORAGE)
 					str.append(" "+to_string(key ));
 			}
 			Message(m.header.from, MR_BROKER, MT_GET_USERS, str.c_str()).send(s);	
