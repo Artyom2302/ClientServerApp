@@ -1,8 +1,9 @@
+import json
 import threading
 import time
-
+import requests
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QMessageBox,QTextEdit
 
 import msg
 
@@ -23,6 +24,8 @@ class MainWindow(QMainWindow):
         self.sendBtn.clicked.connect(self.SendMessage)
         t = threading.Thread(target=self.ProcessMessages)
         t.start()
+        self.jsonData = ""
+        self.messageHistory();
 
     def ShowInfo(self, text):
         mesg = QMessageBox()
@@ -38,6 +41,15 @@ class MainWindow(QMainWindow):
         self.id = m.Header.To
         self.GetUserList()
 
+    def messageHistory(self):
+        try:
+            url = "http://localhost:8080/cgi-bin/webClient.py/api?id="+str(self.id)
+            res = requests.get(url)
+            print(res.content)
+            if res.status_code == 200:
+                self.chatBox.append(res.content.decode("utf-8"))
+        except Exception as ex:
+            print(ex)
     def GetUserList(self):
         self.UsersList.clear()
         m = self.Request(msg.MT_GET_USERS)
@@ -61,6 +73,10 @@ class MainWindow(QMainWindow):
                 index = self.UsersList.findText(m.Data)
                 print(index)
                 self.UsersList.removeItem(index)
+            elif m.Header.Type == msg.MT_LOAD_MESSAGES:
+                mesList = json.loads(m.Data.replace("'", "\""))
+                for mes in mesList:
+                    self.chatBox.append(f"{mes['from']}: {mes['message']}")
             else:
                 time.sleep(1)
         print("exit")
@@ -76,6 +92,7 @@ class MainWindow(QMainWindow):
                 self.Send(int(self.UsersList.currentText()), self.id, msg.MT_DATA, self.messageBox.toPlainText())
         else:
             self.ShowInfo("Enter message")
+        self.messageHistory()
 
     def closeEvent(self, event):
         self.Send(msg.MR_BROKER, self.id, msg.MT_EXIT)
