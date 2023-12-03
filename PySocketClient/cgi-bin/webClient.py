@@ -30,11 +30,12 @@ class Messenger:
 
     def MsgGet(self):
         m = self.Request(MT_GETDATA)
-        if m.Header.Type != MT_NODATA:
+        if m.Header.Type == MT_DATA:
             print("Content-type: text/plain\n")
             print(str(m.Header.Type)+" "+str(m.Header.From) + " " + m.Data)
         if m.Header.Type == MT_LOAD_MESSAGES:
-            print(json.dumps(m.data))
+            print("Content-type: application/json\n\n")
+            print(m.Data.replace("'", "\""))
         return m
     def initialize(self):
         m = self.Request(msg.MT_INIT)
@@ -51,15 +52,13 @@ class Messenger:
         print(m.Data)
     def getMessagesByAPI(self, id):
         m = self.Request(msg.MT_LOAD_MESSAGES)
-        print("Content-type: text/plain\n")
-
-        #while True:
-           # m = self.MsgGet()
-           # if m.Header.Type == MT_LOAD_MESSAGES:
-
-           #     break
-           # else:
-           #     time.sleep(2)
+        #print("Content-type: application/json\n")
+        while True:
+            m = self.MsgGet()
+            if m.Header.Type == MT_LOAD_MESSAGES:
+                break
+            else:
+                time.sleep(1)
 
 def mainAPI(cmd, method,m):
     if method == "GET":
