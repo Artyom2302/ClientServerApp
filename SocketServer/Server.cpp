@@ -55,7 +55,7 @@ void Server::ProcessClient(SOCKET hSock)
 			string str = "";
 			for (auto const& [key, val] : sessions) {
 				if (key != m.header.from && key != MR_STORAGE)
-					str.append(" "+to_string(key ));
+					str.append(to_string(key )+" ");
 			}
 			Message(m.header.from, MR_BROKER, MT_GET_USERS, str.c_str()).send(s);	
 		}

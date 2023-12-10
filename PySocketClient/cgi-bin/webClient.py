@@ -2,6 +2,7 @@ import json
 import os, sys, re, codecs, binascii, cgi, cgitb, datetime, pickle
 import http.cookies
 import time
+from urllib.parse import parse_qs
 
 import msg
 from msg import *
@@ -24,9 +25,10 @@ class Messenger:
 
 
     def MsgSend(self):
-        self.Send(self.q.getvalue('idTo'), self.q.getvalue('message'))
+        message = self.q.getvalue('message', '').strip()
+        self.Send(self.q.getvalue('idTo'), str(message))
         print("Content-type: text/plain\n")
-        print()
+        print(message)
 
     def MsgGet(self):
         m = self.Request(MT_GETDATA)
@@ -41,7 +43,7 @@ class Messenger:
         m = self.Request(msg.MT_INIT)
         self.id = m.Header.To
         print("Content-type: text/plain\n")
-        print(self.id)
+        print(m.Header.To)
     def getUserList(self):
         m = self.Request(msg.MT_GET_USERS)
         print("Content-type: text/plain\n")
@@ -52,7 +54,6 @@ class Messenger:
         print(m.Data)
     def getMessagesByAPI(self, id):
         m = self.Request(msg.MT_LOAD_MESSAGES)
-        #print("Content-type: application/json\n")
         while True:
             m = self.MsgGet()
             if m.Header.Type == MT_LOAD_MESSAGES:
@@ -80,6 +81,7 @@ def main():
         'getUserList': m.getUserList,
         'load': m.getMessageList
     }
+
 
     try:
         MENU[q.getvalue('type')]()

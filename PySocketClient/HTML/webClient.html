@@ -123,7 +123,7 @@ function getUserList(){
             list.innerHTML=" <option value='-1'>All users</option>"
             var partsArray = data.split(' ');
             partsArray.forEach(element => {
-            if (element!=''){
+            if (element!='\n'){
             list.innerHTML +="<option value="+element+">"+element+"</option>";
             }
             });
