@@ -8,14 +8,20 @@ enum MessageTypes
 	MT_DATA,
 	MT_NODATA,
 	MT_CONFIRM,
-	MT_NOT_FOUND
+	MT_GET_USERS,
+	MT_NOT_FOUND,
+	MT_ADD_USER,
+	MT_DELETE_USER,
+	MT_STORAGE_INIT,
+	MT_LOAD_MESSAGES
 };
 
 enum MessageRecipients
 {
-	MR_BROKER = 10,
-	MR_ALL = 50,
-	MR_USER = 100
+	MR_STORAGE = -3,
+	MR_BROKER = -2,
+	MR_ALL = -1,
+	MR_USER = 0,
 };
 
 struct MessageHeader
@@ -31,8 +37,6 @@ class Message
 public:
 	MessageHeader header = {0};
 	string data;
-	static int clientID;
-
 	Message() {}
 	Message(int to, int from, int type = MT_DATA, const string& data = "")
 	{
@@ -63,8 +67,8 @@ public:
 		}
 		return header.type;
 	}
-
 	static void send(CSocket& s, int to, int from, int type = MT_DATA, const string& data = "");
-	static Message send(int to, int type = MT_DATA, const string& data = "");
+	static Message request(int to,int from, int type = MT_DATA, const string& data = "");
+	static void send(int to, int from, int type = MT_DATA, const string& data = "");
 };
 

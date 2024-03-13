@@ -16,7 +16,6 @@ string GetLastErrorString(DWORD ErrorID = 0)
 	return s;
 }
 
-int Message::clientID = 0;
 
 void Message::send(CSocket& s, int to, int from, int type, const string& data)
 {
@@ -24,20 +23,29 @@ void Message::send(CSocket& s, int to, int from, int type, const string& data)
 	m.send(s);
 }
 
-Message Message::send(int to, int type, const string& data)
+Message Message::request(int to,int from, int type, const string& data)
+{
+	CSocket s;
+	time_t timer = time(NULL);
+	s.Create();
+	while (!s.Connect("127.0.0.1", 12345)) {
+		cout << "Try to connect..." << endl;
+	}
+	Message m(to, from, type, data);
+	m.send(s);
+	m.receive(s);
+	return m;
+}
+
+void Message::send(int to, int from, int type, const string& data)
 {
 	CSocket s;
 	s.Create();
-	if (!s.Connect("127.0.0.1", 12345))
-	{
-		throw runtime_error(GetLastErrorString());
+	while (!s.Connect("127.0.0.1", 12345)) {
+		cout << "Try to connect..." << endl;
 	}
-	Message m(to, clientID, type, data);
+	Message m(to, from, type, data);
 	m.send(s);
-	if (m.receive(s) == MT_INIT)
-	{
-		clientID = m.header.to;
-	}
-	return m;
 }
+
 

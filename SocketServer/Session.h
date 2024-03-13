@@ -9,6 +9,11 @@ public:
 	time_t lastConnectionTime;
 
 	CCriticalSection cs;
+	Session()
+		:id(-100), name("Empty session"), lastConnectionTime(time(NULL))
+	{
+
+	}
 	Session(int _id, string _name)
 		:id(_id), name(_name), lastConnectionTime(time(NULL))
 	{
@@ -28,9 +33,6 @@ public:
 		if (messages.empty())
 		{
 			Message::send(s, id, MR_BROKER,MT_NODATA);
-			if (abs(lastConnectionTime - time(NULL)) > 10) {
-				messages.push(Message(id,MR_BROKER,MT_EXIT));
-			};
 		}
 		else
 		{
